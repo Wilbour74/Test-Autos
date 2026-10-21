@@ -1,23 +1,42 @@
-name: Execution de test
+name: Tests
 
 on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
-  build:
+  tests:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Check out repository
+        uses: actions/checkout@v4
+
       - name: Set up PHP
-        uses: shivammathur/setup-php@2.37.2
+        uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
-          extensions: mbstring, pdo_sqlite, sqlite3, gd, zip, bcmath, redis
+          extensions: mbstring, pdo_sqlite, sqlite3
           coverage: none
+
       - name: Check PHP version
-        run: php -v
+        run: |
+          php --version
+          php -r 'if (version_compare(PHP_VERSION, "8.4.1", "<")) { fwrite(STDERR, "PHP >= 8.4.1 is required; found ".PHP_VERSION.PHP_EOL); exit(1); }'
+
+      - name: Validate Composer files
+        run: composer validate --strict
+
       - name: Install dependencies
         run: composer install --no-interaction --no-progress --prefer-dist --optimize-autoloader
+
       - name: Run tests
         run: php artisan test
