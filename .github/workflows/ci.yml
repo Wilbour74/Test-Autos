@@ -15,7 +15,9 @@ jobs:
           php-version: '8.4'
           extensions: mbstring, pdo_sqlite, sqlite3, gd, zip, bcmath, redis
           coverage: none
+      - name: Check PHP version
+        run: php -v
       - name: Install dependencies
-        run: composer update --no-interaction --no-progress --prefer-dist --optimize-autoloader
+        run: composer install --no-interaction --no-progress --prefer-dist --optimize-autoloader
       - name: Run tests
         run: php artisan test
